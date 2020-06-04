@@ -16,6 +16,7 @@ class TestWorldsApi(APITestCase):
 
     def setUp(self):
         self.user = UserFactory()
+        self.different_user = UserFactory()
         self.token = self.get_tokens_for_user(self.user)
 
     def get_tokens_for_user(self, user):
@@ -68,15 +69,18 @@ class TestWorldsApi(APITestCase):
         Key.objects.create(user=self.user, word='Test1')
         Key.objects.create(user=self.user, word='Test2')
 
+        Key.objects.create(user=self.different_user, word='Test3')
+
         response = self.client.get(
             self.order_url,
             HTTP_AUTHORIZATION='Bearer ' + self.token,
             format='json',
         )
 
+        keys = response.data
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        count_user_keys = Key.objects.count()
-        self.assertEqual(count_user_keys, 2)
+        self.assertEqual(len(keys), 2)
 
     def test_delete_key_with_auth_user(self):
         """Test delete key with authentication user."""
