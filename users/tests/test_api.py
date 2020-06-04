@@ -19,8 +19,9 @@ class TestUser(APITestCase):
         response = self.client.post(
             self.order_url,
             data=data,
+            format='json',
         )
-        new_user = User.objects.get(email=response.data['email'])
+        new_user = User.objects.get(email=data['email'])
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(new_user.username, response.data['username'])
