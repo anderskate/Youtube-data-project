@@ -138,3 +138,6 @@ REST_FRAMEWORK = {
     ],
 }
 REST_USE_JWT = True
+
+YOUTUBE_API_KEY = '%YOUTUBE_API_KEY%'
+YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch'
