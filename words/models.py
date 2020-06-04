@@ -7,4 +7,7 @@ class Key(models.Model):
         to='users.User',
         on_delete=models.CASCADE,
     )
-    word = models.CharField(max_length=50, unique=True)
+    word = models.CharField(max_length=50)
+
+    class Meta:
+        unique_together = ('user', 'word',)
