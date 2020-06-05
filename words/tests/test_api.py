@@ -3,12 +3,12 @@ from rest_framework import status
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from ..models import Key
+from ..models import Key, Video
 
 from users.factories import UserFactory
 
 
-class TestWorldsApi(APITestCase):
+class TestWordsApi(APITestCase):
     """Test `Search` API
     Test creation, deleting and retrieving Search keys
     """
@@ -95,3 +95,20 @@ class TestWorldsApi(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         count_user_keys = Key.objects.count()
         self.assertEqual(count_user_keys, 0)
+
+    def test_get_all_videos_to_word(self):
+        """Test that can get all videos for specific word."""
+        new_word = Key.objects.create(user=self.user, word='Test1')
+        video_1 = Video.objects.create(key=new_word, url='sample1.url')
+        video_2 = Video.objects.create(key=new_word, url='sample2.url')
+
+        url = f'{self.order_url}{new_word.id}/videos/'
+        response = self.client.get(
+            url,
+            HTTP_AUTHORIZATION='Bearer ' + self.token,
+            format='json',
+        )
+        videos = response.data.get('videos')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(videos), 2)

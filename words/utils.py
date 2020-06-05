@@ -16,6 +16,7 @@ def get_video_links_from_youtube_api(key, service='youtube', version='v3'):
     request = youtube.search().list(
         part='snippet',
         type='video',
+        order='date',
         q=key,
     )
 
@@ -27,5 +28,3 @@ def get_video_links_from_youtube_api(key, service='youtube', version='v3'):
         video_url = f'{settings.YOUTUBE_VIDEO_URL}?v={video_id}'
         video_urls.append(video_url)
     return video_urls
-
-
