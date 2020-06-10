@@ -3,27 +3,29 @@ from celery import shared_task
 import logging
 from .models import Key, Video
 from .utils import get_video_links_from_youtube_api
-
 import concurrent.futures
-import time
 
 logger = logging.getLogger('django')
 
 
 @shared_task
 def update_videos_for_all_keys():
-    t1 = time.perf_counter()
+    """Update links to video keys received from Youtube API."""
+
     keys = Key.objects.all()
-    for key in keys:
-        links = get_video_links_from_youtube_api(key.word)
-        logger.info(links)
-        for link in links:
-            Video.objects.get_or_create(
-                key=key,
-                url=link,
-            )
-    logger.info('Updated words from youtube API')
-    t2 = time.perf_counter()
+    key_words = [key.word for key in keys]
 
-    logger.info(f'Finished in {t2 - t1} seconds')
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        urls_for_keys = executor.map(
+            get_video_links_from_youtube_api,
+            key_words,
+        )
+        results = dict(zip(keys, urls_for_keys))
 
+        for key, urls in results.items():
+            for url in urls:
+                Video.objects.get_or_create(
+                    key=key,
+                    url=url,
+                )
+    logger.info(f'Update urls to words')
