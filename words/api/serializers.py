@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from ..models import Key, Video
 from datetime import datetime
+from django.core.paginator import Paginator, EmptyPage
 
 
 class KeySerializer(ModelSerializer):
@@ -37,6 +38,7 @@ class KeyWithVideosSerializer(ModelSerializer):
 
         date_gte = request.query_params.get('date_gte', None)
         date_lte = request.query_params.get('date_lte', None)
+        page = request.query_params.get('page', None)
         if date_gte:
             videos = videos.filter(
                 creation_date__gte=datetime.strptime(date_gte, '%d.%m.%Y')
@@ -45,6 +47,15 @@ class KeyWithVideosSerializer(ModelSerializer):
             videos = videos.filter(
                 creation_date__lte=datetime.strptime(date_lte, '%d.%m.%Y')
             )
+
+        paginator = Paginator(videos, 10)
+        if page:
+            try:
+                videos = paginator.page(page)
+            except EmptyPage:
+                videos = []
+        else:
+            videos = paginator.page(1)
 
         return VideoSerializer(videos, many=True).data
 
