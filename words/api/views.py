@@ -9,7 +9,7 @@ from rest_framework.status import (
     HTTP_200_OK,
 )
 from rest_framework.decorators import action
-
+from django.shortcuts import get_object_or_404
 
 class KeyViewSet(viewsets.ModelViewSet):
     """View for `Key` model"""
@@ -35,7 +35,12 @@ class KeyViewSet(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=True)
     def videos(self, request, pk=None):
         """Get all videos for current key."""
-        obj = Key.objects.get(id=pk)
+        if not pk.isdigit():
+            return Response(
+                data={'detail': f'pk {pk} is incorrect.'},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        obj = get_object_or_404(Key, pk=pk)
         serializer = KeyWithVideosSerializer(
             obj,
             context={'request': request},
