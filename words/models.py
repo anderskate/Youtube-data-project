@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime
 
 
 class Key(models.Model):
@@ -25,3 +26,4 @@ class Video(models.Model):
         related_name='videos',
     )
     url = models.CharField(max_length=300)
+    creation_date = models.DateField(auto_now_add=True)

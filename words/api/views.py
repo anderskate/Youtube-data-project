@@ -36,8 +36,12 @@ class KeyViewSet(viewsets.ModelViewSet):
     def videos(self, request, pk=None):
         """Get all videos for current key."""
         obj = Key.objects.get(id=pk)
-        serializer = KeyWithVideosSerializer(obj)
+        serializer = KeyWithVideosSerializer(
+            obj,
+            context={'request': request},
+        )
         data = serializer.data
+
         return Response(
             data,
             status=HTTP_200_OK,

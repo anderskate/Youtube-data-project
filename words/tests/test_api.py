@@ -7,6 +7,8 @@ from ..models import Key, Video
 
 from users.factories import UserFactory
 
+from datetime import datetime
+
 
 class TestWordsApi(APITestCase):
     """Test `Search` API
@@ -112,3 +114,40 @@ class TestWordsApi(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(videos), 2)
+
+    def test_get_videos_with_specific_datetime(self):
+        """Test that can get videos with specific datetime."""
+        new_word = Key.objects.create(user=self.user, word='Test2')
+        video_1 = Video.objects.create(
+            key=new_word,
+            url='sample1.url',
+        )
+        video_1.creation_date = datetime(2020, 6, 10)
+        video_1.save()
+        video_2 = Video.objects.create(
+            key=new_word,
+            url='sample2.url',
+            creation_date=datetime(2020, 6, 10)
+        )
+        video_2.creation_date = datetime(2020, 6, 10)
+        video_2.save()
+        video_without_correct_date = Video.objects.create(
+            key=new_word,
+            url='sample2.url',
+        )
+        start_time = '09.06.2020'
+        close_time = '13.06.2020'
+
+        url = f'{self.order_url}{new_word.id}/videos/'\
+              f'?date_gte={start_time}&date_lte={close_time}'
+        response = self.client.get(
+            url,
+            HTTP_AUTHORIZATION='Bearer ' + self.token,
+            format='json',
+        )
+        videos = response.data.get('videos')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(videos), 2)
+        self.assertContains(response, 'sample1.url')
+        self.assertContains(response, 'sample2.url')
