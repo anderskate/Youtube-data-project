@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from environs import Env
+
+
+env = Env()
+env.read_env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,10 +24,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ypmdp9wllal$y9%f^py(j*3c5fx&md^md9oyp*e^%h%8%)hs5g'
+SECRET_KEY = env.str('SECRET_KEY', default='my_secret_key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=True)
 
 ALLOWED_HOSTS = []
 
@@ -77,10 +82,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+     'default': env.dj_db_url(
+         'DATABASE_URL',
+         'sqlite://localhost:5432/db.sqlite3',
+     )
 }
 
 AUTH_USER_MODEL = 'users.User'
@@ -133,7 +138,7 @@ REST_FRAMEWORK = {
 }
 REST_USE_JWT = True
 
-YOUTUBE_API_KEY = '%YOUTUBE_API_KEY%'
+YOUTUBE_API_KEY = env.str('YOUTUBE_API_KEY')
 YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch'
 
 # CELERY STUFF
